@@ -1,0 +1,56 @@
+= The Packaging Style Guide
+:idprefix:
+:idseparator: -
+:sectanchors:
+:sectlinks:
+:toc: preamble
+:toclevels: 1
+ifndef::backend-pdf[]
+:toc-title: pass:[<h2>Table of Contents</h2>]
+endif::[]
+:source-highlighter: rouge
+
+== Introduction
+
+[quote, Officer Alex J. Murphy / RoboCop]
+____
+Role models are important.
+____
+
+This Packaging style guide outlines the recommended best practices for real-world programmers
+to write code that can be maintained both, upstream and downstream.
+
+You can generate a PDF copy of this guide using https://asciidoctor.org/docs/asciidoctor-pdf/[AsciiDoctor PDF],
+and an HTML copy https://asciidoctor.org/docs/convert-documents/#converting-a-document-to-html[with] https://asciidoctor.org/#installation[AsciiDoctor]
+using the following commands:
+
+[source,shell]
+----
+# Generates README.pdf
+asciidoctor-pdf -a allow-uri-read README.adoc
+
+# Generates README.html
+asciidoctor
+----
+
+[TIP]
+====
+Install the `rouge` gem to get nice syntax highlighting in the generated document.
+
+[source,shell]
+----
+gem install rouge
+----
+====
+
+[TIP]
+====
+https://github.com/rubocop-hq/rubocop[RuboCop], a static code analyzer (linter) and formatter,
+has a https://github.com/utkarsh2102/rubocop-packaging[`rubocop-packaging`] extension, based
+on this style guide.
+
+[source,shell]
+----
+gem install rubocop-packaging
+----
+====
