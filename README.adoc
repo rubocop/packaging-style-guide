@@ -17,6 +17,7 @@ ____
 Role models are important.
 ____
 
+
 This Packaging style guide outlines the recommended best practices for real-world programmers
 to write code that can be maintained both, upstream and downstream.
 
@@ -54,3 +55,19 @@ on this style guide.
 gem install rubocop-packaging
 ----
 ====
+
+
+== How To Read This Guide
+
+The guide is separated into sections based on the different cops that the Packaging extension
+provides. +
+There was an attempt to explicitly mention everything so if anything is still unclear, feel
+free to open an issue asking for further clarity.
+
+
+== A Living Document
+
+This guide is a work in progress - existing guidelines are constantly being improved, new
+guidelines are being added, and occasionally some guidelines would get removed.
+
+
