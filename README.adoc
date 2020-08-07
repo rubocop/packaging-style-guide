@@ -31,7 +31,7 @@ using the following commands:
 asciidoctor-pdf -a allow-uri-read README.adoc
 
 # Generates README.html
-asciidoctor
+asciidoctor README.adoc
 ----
 
 [TIP]
@@ -71,3 +71,107 @@ This guide is a work in progress - existing guidelines are constantly being impr
 guidelines are being added, and occasionally some guidelines would get removed.
 
 
+== Why Packaging Extension?
+
+The Debian Ruby team has a lot of experience in packaging and maintaining Ruby libraries and
+applications for Debian. During this work, they identified several issues in upstream codebases
+that makes it difficult to build a Debian package straight out of those Ruby gems (shipped via
+https://rubygems.org[rubygems]).
+
+The Debian developers (downstream maintainers) have been in touch with the RubyGems and other
+upstream maintainers and we're collaborating to try to make things easier for OS packagers
+while not compromising the experience for upstream maintainers.
+
+As a result, we're working on this RuboCop extension to enforce a set of best practices that
+upstream maintainers can follow to make lifes of packagers easier. +
+And that is how `rubocop-packaging` is born!
+
+
+== Cops Description
+
+Listed below are the cops provided by the `Packaging` extension, describing the need to write
+and enforce it and how is it problematic on the Debian (downstream) side.
+
+=== Gemspec Git [[gemspec-git]]
+
+About the `GemspecGit` cop:
+
+==== Rationale [[gemspec-git-rationale]]
+
+Avoid using `git ls-files` to produce lists of files. Downstreams often need to build your
+package in an environment that does not have git (on purpose). Instead, use some
+pure Ruby alternative, like `Dir` or `Dir.glob`.
+
+==== Need [[gemspec-git-need]]
+
+Packages in Debian are built in a clean environment (https://wiki.debian.org/sbuild[sbuild],
+https://wiki.debian.org/Schroot[schroot], et al) and whilst doing so, the build fails with: +
+`Invalid gemspec in [<gem_name>.gemspec]: No such file or directory - git`
+
+And adding `git` as a dependency for each of the Ruby packaging is something that is not right
+and definitely not recommended.
+
+Therefore, the other way is to patch out the usage of `git` and use some plain Ruby alternative
+like `Dir` or `Dir.glob` or even `Rake::FileList`.
+
+There's not only Debian or other OS packaging situation/examples, but also a couple others,
+for instance:
+
+* `ruby-core` as part of their CI system runs their test suite against an unpackaged Ruby
+  tarball which doesn't have a `.git` folders. That means they needed to overwrite the
+  bundler gemspec to not use git. +
+  Actually, not anymore, https://github.com/rubygems/bundler/pull/6985[since git has been removed from bundler's gemspec].
+
+* If you build your application on a bare docker image without git, and you are pointing to
+  a git sourced gem that uses git on its gemspec, you'll get:
+  `No such file or directory - git ls-files (Errno::ENOENT)` warnings all around. +
+  For example, if you use this in your Gemfile: +
+  `gem "foo", git: "https://github.com/has-git-in-gemspec/foo"`
+
+Originally, `git ls-files` inside the default gemspec template was designed so that users
+publishing their first gem wouldn't unintentionally publish artifacts to it. +
+Now that `bundler` won't let you release if you have uncommitted stuff in your working
+repository, the risk is quite lower (if none at all!).
+
+==== Examples [[gemspec-git-examples]]
+
+[source,ruby]
+----
+# bad
+Gem::Specification.new do |spec|
+  spec.files         = `git ls-files`.split('\n')
+  spec.test_files    = `git ls-files -- spec/*`.split('\n')
+end
+
+# bad
+Gem::Specification.new do |spec|
+  spec.files         = Dir.chdir(File.expand_path('..', __FILE__)) do
+    `git ls-files -z`.split('\\x0').reject { |f| f.match(%r{^(test|spec|features)/}) }
+  end
+end
+
+# bad
+Gem::Specification.new do |spec|
+  spec.files         = `git ls-files`.split('\n')
+  spec.test_files    = `git ls-files -- test/{functional,unit}/*`.split('\n')
+  spec.executables   = `git ls-files -- bin/*`.split('\n').map { |f| File.basename(f) }
+end
+
+# good
+Gem::Specification.new do |spec|
+  spec.files         = Dir['lib/**/*', 'LICENSE', 'README.md']
+  spec.test_files    = Dir['spec/**/*']
+end
+
+# good
+Gem::Specification.new do |spec|
+  spec.files         = Rake::FileList['**/*'].exclude(*File.read('.gitignore').split)
+end
+
+# good
+Gem::Specification.new do |spec|
+  spec.files         = Dir.glob('lib/**/*')
+  spec.test_files    = Dir.glob('test/{functional,test}/*')
+  spec.executables   = Dir.glob('bin/*').map { |f| File.basename(f) }
+end
+----
