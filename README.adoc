@@ -75,7 +75,7 @@ guidelines are being added, and occasionally some guidelines would get removed.
 
 The Debian Ruby team has a lot of experience in packaging and maintaining Ruby libraries and
 applications for Debian. During this work, they identified several issues in upstream codebases
-that makes it difficult to build a Debian package straight out of those Ruby gems (shipped via
+that make it difficult to build a Debian package straight out of those Ruby gems (shipped via
 https://rubygems.org[rubygems]).
 
 The Debian developers (downstream maintainers) have been in touch with the RubyGems and other
@@ -83,7 +83,7 @@ upstream maintainers and we're collaborating to try to make things easier for OS
 while not compromising the experience for upstream maintainers.
 
 As a result, we're working on this RuboCop extension to enforce a set of best practices that
-upstream maintainers can follow to make lifes of packagers easier. +
+upstream maintainers can follow to make the lives of packagers easier. +
 And that is how `rubocop-packaging` is born!
 
 
@@ -100,7 +100,7 @@ About the `GemspecGit` cop:
 
 Avoid using `git ls-files` to produce lists of files. Downstreams often need to build your
 package in an environment that does not have git (on purpose). Instead, use some
-pure Ruby alternative, like `Dir` or `Dir.glob`.
+pure Ruby alternatives, like `Dir` or `Dir.glob`.
 
 ==== Need [[gemspec-git-need]]
 
@@ -111,10 +111,10 @@ https://wiki.debian.org/Schroot[schroot], et al) and whilst doing so, the build 
 And adding `git` as a dependency for each of the Ruby packaging is something that is not right
 and definitely not recommended.
 
-Therefore, the other way is to patch out the usage of `git` and use some plain Ruby alternative
-like `Dir` or `Dir.glob` or even `Rake::FileList`.
+Therefore, the other way is to patch out the usage of `git` and use some plain Ruby
+alternatives like `Dir` or `Dir.glob` or even `Rake::FileList`.
 
-There's not only Debian or other OS packaging situation/examples, but also a couple others,
+There's not only Debian or other OS packaging situation/examples, but also a couple of others,
 for instance:
 
 * `ruby-core` as part of their CI system runs their test suite against an unpackaged Ruby
@@ -193,12 +193,12 @@ library installed globally via the Debian package. +
 We do so because we want to ensure that the library is loaded from the system location and not
 from the source tree and that it works like it is intended to.
 
-Therefore, when one uses relative path, we end up getting a `LoadError`, stating: +
+Therefore, when one uses a relative path, we end up getting a `LoadError`, stating: +
 `cannot load such file -- /<<PKGBUILDDIR>>/foo`.
 
-Of course, that said, with this cop, we don't intend to disregard the usasge of `require_relative`
+Of course, that said, with this cop, we don't intend to disregard the usage of `require_relative`
 in general. Not at all! It is still recommended but we just add one tiny exception to it. +
-That is, avoid using `require_relative` with relative path to `lib/` in your tests. That's
+That is, avoid using `require_relative` with a relative path to `lib/` in your tests. That's
 it, that's all we ask!
 
 ==== Examples [[require-relative-to-lib-examples]]
