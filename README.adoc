@@ -143,6 +143,12 @@ Gem::Specification.new do |spec|
   spec.test_files    = `git ls-files -- spec/*`.split('\n')
 end
 
+# good
+Gem::Specification.new do |spec|
+  spec.files         = Dir['lib/**/*', 'LICENSE', 'README.md']
+  spec.test_files    = Dir['spec/**/*']
+end
+
 # bad
 Gem::Specification.new do |spec|
   spec.files         = Dir.chdir(File.expand_path('..', __FILE__)) do
@@ -150,22 +156,16 @@ Gem::Specification.new do |spec|
   end
 end
 
+# good
+Gem::Specification.new do |spec|
+  spec.files         = Rake::FileList['**/*'].exclude(*File.read('.gitignore').split)
+end
+
 # bad
 Gem::Specification.new do |spec|
   spec.files         = `git ls-files`.split('\n')
   spec.test_files    = `git ls-files -- test/{functional,unit}/*`.split('\n')
   spec.executables   = `git ls-files -- bin/*`.split('\n').map { |f| File.basename(f) }
-end
-
-# good
-Gem::Specification.new do |spec|
-  spec.files         = Dir['lib/**/*', 'LICENSE', 'README.md']
-  spec.test_files    = Dir['spec/**/*']
-end
-
-# good
-Gem::Specification.new do |spec|
-  spec.files         = Rake::FileList['**/*'].exclude(*File.read('.gitignore').split)
 end
 
 # good
@@ -208,11 +208,11 @@ it, that's all we ask!
 # bad
 require_relative '../../lib/foo/bar'
 
-# bad
-require_relative 'lib/foo.rb'
-
 # good
 require 'foo/bar'
+
+# bad
+require_relative 'lib/foo.rb'
 
 # good
 require 'foo.rb'
