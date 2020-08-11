@@ -175,3 +175,49 @@ Gem::Specification.new do |spec|
   spec.executables   = Dir.glob('bin/*').map { |f| File.basename(f) }
 end
 ----
+
+
+=== Relative Require To Lib [[require-relative-to-lib]]
+
+About the `RelativeRequireToLib` cop:
+
+==== Rationale [[require-relative-to-lib-rationale]]
+
+Avoid using `require_relative` with relative path to lib. Use `require` instead.
+
+==== Need [[require-relative-to-lib-need]]
+
+As mentioned earlier, packages in Debian are built in a clean environment. After building them,
+we also run the tests with the `lib/` directory removed to force those tests to use the
+library installed globally via the Debian package. +
+We do so because we want to ensure that the library is loaded from the system location and not
+from the source tree and that it works like it is intended to.
+
+Therefore, when one uses relative path, we end up getting a `LoadError`, stating: +
+`cannot load such file -- /<<PKGBUILDDIR>>/foo`.
+
+Of course, that said, with this cop, we don't intend to disregard the usasge of `require_relative`
+in general. Not at all! It is still recommended but we just add one tiny exception to it. +
+That is, avoid using `require_relative` with relative path to `lib/` in your tests. That's
+it, that's all we ask!
+
+==== Examples [[require-relative-to-lib-examples]]
+
+[source,ruby]
+----
+# bad
+require_relative '../../lib/foo/bar'
+
+# bad
+require_relative 'lib/foo.rb'
+
+# good
+require 'foo/bar'
+
+# good
+require 'foo.rb'
+
+# good
+require_relative 'spec_helper'
+require_relative 'foo/bar'
+----
