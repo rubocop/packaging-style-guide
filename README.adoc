@@ -254,3 +254,11 @@ It's easy, just follow the contribution guidelines below:
 
 image:https://i.creativecommons.org/l/by/3.0/88x31.png[Creative Commons License] This work
 is licensed under a http://creativecommons.org/licenses/by/3.0/deed.en_US[Creative Commons Attribution 3.0 Unported License].
+
+
+== Spread the Word
+
+A community-driven style guide is of little use to a community that doesn't know about its
+existence. Tweet about the guide, share it with your friends and colleagues. +
+Every comment, suggestion, or opinion we get, makes the guide a little bit better.
+And we want to have the best possible guide, don't we?
