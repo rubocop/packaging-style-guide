@@ -221,3 +221,30 @@ require 'foo.rb'
 require_relative 'spec_helper'
 require_relative 'foo/bar'
 ----
+
+
+== Contributing
+
+The guide is still a work in progress - new cops are being added, existing ones are being
+refactored. And whilst doing so, some bits might need a little more polishing and
+paraphrasing to make things clearer. +
+Improving such guidelines is a great (and simple way) to help the Ruby community!
+
+Also, nothing written in this guide is set in stone. We desire to work together with
+everyone interested in Ruby coding style, so that we could ultimately create a resource that
+will be beneficial to the entire Ruby community!
+
+Feel free to open issues or send pull requests with improvements. Thanks in advance for your
+help!
+
+=== How to Contribute?
+
+It's easy, just follow the contribution guidelines below:
+
+* https://help.github.com/articles/fork-a-repo[Fork]
+  https://github.com/utkarsh2102/rubocop-packaging[rubocop-packaging] on GitHub.
+* Make your feature addition or bug fix in a feature branch.
+* Include a https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html[good description]
+  of your changes.
+* Push your feature branch to GitHub.
+* And finally, send a https://help.github.com/articles/using-pull-requests[pull request].
