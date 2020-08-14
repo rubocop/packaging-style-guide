@@ -109,16 +109,22 @@ https://wiki.debian.org/Schroot[schroot], et al) and whilst doing so, the build 
 `Invalid gemspec in [<gem_name>.gemspec]: No such file or directory - git`
 
 And adding `git` as a dependency for each of the Ruby packaging is something that is not right
-and definitely not recommended.
+and definitely not recommended. Besides, the source package consists of released tarballs
+(usually downloaded from GitHub/GitLab releases page or converted from the `.gem` file,
+obtained using `gem fetch foo`), which is extracted during build. So even if we add `git` as
+a build dependency, it would still fail as the Debian package source tree is *not a git repo*.
+Even when the package is maintained in git, it is uploaded as tarballs to the archive without
+any version control information.
 
-Therefore, the other way is to patch out the usage of `git` and use some plain Ruby
-alternatives like `Dir` or `Dir.glob` or even `Rake::FileList`.
+Therefore, the only way forward here is to patch out the usage of `git` and use some plain Ruby
+alternatives like `Dir` or `Dir.glob` or even `Rake::FileList` whilst doing the Debian
+maintenance.
 
 There's not only Debian or other OS packaging situation/examples, but also a couple of others,
 for instance:
 
 * `ruby-core` as part of their CI system runs their test suite against an unpackaged Ruby
-  tarball which doesn't have a `.git` folders. That means they needed to overwrite the
+  tarball which doesn't have a `.git` directory. That means they needed to overwrite the
   bundler gemspec to not use git. +
   Actually, not anymore, https://github.com/rubygems/bundler/pull/6985[since git has been removed from bundler's gemspec].
 
@@ -129,9 +135,9 @@ for instance:
   `gem "foo", git: "https://github.com/has-git-in-gemspec/foo"`
 
 Originally, `git ls-files` inside the default gemspec template was designed so that users
-publishing their first gem wouldn't unintentionally publish artifacts to it. +
-Now that `bundler` won't let you release if you have uncommitted stuff in your working
-repository, the risk is quite lower (if none at all!).
+publishing their first gem wouldn't unintentionally publish artifacts to it.
+Recent versions of bundler won't let you release if you have uncommitted files in your
+working directory, so that risk is lower.
 
 ==== Examples [[gemspec-git-examples]]
 
@@ -187,19 +193,22 @@ Avoid using `require_relative` with relative path to lib. Use `require` instead.
 
 ==== Need [[require-relative-to-lib-need]]
 
-As mentioned earlier, packages in Debian are built in a clean environment. After building them,
-we also run the tests with the `lib/` directory removed to force those tests to use the
-library installed globally via the Debian package. +
-We do so because we want to ensure that the library is loaded from the system location and not
-from the source tree and that it works like it is intended to.
+Debian has a https://ci.debian.net/[testing infrastructure] that is designed to test packages
+in their installed form, i.e., closer to how an end-user would use it than to how a developer
+working against it. For this to work, the test-suite must load code that's installed
+system-wide, instead of the code in the source tree. Using `require_relative` from the tests
+into the `lib` directory makes that impossible, but it also makes the test look less like
+client-code that would use the code in your gem. Therefore, we recommend that test code uses
+the main library code without `require_relative`.
 
 Therefore, when one uses a relative path, we end up getting a `LoadError`, stating: +
 `cannot load such file -- /<<PKGBUILDDIR>>/foo`.
 
-Of course, that said, with this cop, we don't intend to disregard the usage of `require_relative`
-in general. Not at all! It is still recommended but we just add one tiny exception to it. +
-That is, avoid using `require_relative` with a relative path to `lib/` in your tests. That's
-it, that's all we ask!
+We want to emphasize that *there is nothing wrong* with using `require_relative` inside `lib/`,
+it's just using it from your test code to the `lib` directory prevents the "test the library
+installed system-wide" use case.
+
+Therefore, it is still recommended to use `require_relative` with just this exception to it.
 
 ==== Examples [[require-relative-to-lib-examples]]
 
@@ -219,7 +228,7 @@ require 'foo.rb'
 
 # good
 require_relative 'spec_helper'
-require_relative 'foo/bar'
+require_relative 'spec/foo/bar'
 ----
 
 
