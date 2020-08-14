@@ -60,9 +60,8 @@ gem install rubocop-packaging
 == How To Read This Guide
 
 The guide is separated into sections based on the different cops that the Packaging extension
-provides. +
-There was an attempt to explicitly mention everything so if anything is still unclear, feel
-free to open an issue asking for further clarity.
+provides. There was an attempt to explicitly mention everything so if anything is still
+unclear, feel free to open an issue asking for further clarity.
 
 
 == A Living Document
@@ -83,8 +82,8 @@ upstream maintainers and we're collaborating to try to make things easier for OS
 while not compromising the experience for upstream maintainers.
 
 As a result, we're working on this RuboCop extension to enforce a set of best practices that
-upstream maintainers can follow to make the lives of packagers easier. +
-And that is how `rubocop-packaging` is born!
+upstream maintainers can follow to make the lives of packagers easier. And that is how
+`rubocop-packaging` is born!
 
 
 == Cops Description
@@ -130,8 +129,8 @@ for instance:
 
 * If you build your application on a bare docker image without git, and you are pointing to
   a git sourced gem that uses git on its gemspec, you'll get:
-  `No such file or directory - git ls-files (Errno::ENOENT)` warnings all around. +
-  For example, if you use this in your Gemfile: +
+  `No such file or directory - git ls-files (Errno::ENOENT)` warnings all around. For
+  example, if you use this in your Gemfile: +
   `gem "foo", git: "https://github.com/has-git-in-gemspec/foo"`
 
 Originally, `git ls-files` inside the default gemspec template was designed so that users
@@ -236,8 +235,8 @@ require_relative 'spec/foo/bar'
 
 The guide is still a work in progress - new cops are being added, existing ones are being
 refactored. And whilst doing so, some bits might need a little more polishing and
-paraphrasing to make things clearer. +
-Improving such guidelines is a great (and simple way) to help the Ruby community!
+paraphrasing to make things clearer. Improving such guidelines is a great (and simple way)
+to help the Ruby community!
 
 Also, nothing written in this guide is set in stone. We desire to work together with
 everyone interested in Ruby coding style, so that we could ultimately create a resource that
@@ -268,17 +267,18 @@ is licensed under a http://creativecommons.org/licenses/by/3.0/deed.en_US[Creati
 == Spread the Word
 
 A community-driven style guide is of little use to a community that doesn't know about its
-existence. Tweet about the guide, share it with your friends and colleagues. +
-Every comment, suggestion, or opinion we get, makes the guide a little bit better.
-And we want to have the best possible guide, don't we?
+existence. Tweet/toot about the guide, share it with your friends and colleagues. Every
+comment, suggestion, or opinion we get, makes the guide a little bit better. And we want to
+have the best possible guide, don't we?
 
 
 == Credits
 
 This guide has been put together with the help of our experienced Ruby team in Debian. So a
 huge thanks to all of them and their work. Particularly, https://github.com/terceiro[Antonio Terceiro],
-who has helped a lot in putting all this together in the best possible way! +
-Besides, a huge thanks to https://github.com/deivid-rodriguez[David Rodríguez], an upstream
+who has helped a lot in putting all this together in the best possible way!
+
+And also a huge thanks to https://github.com/deivid-rodriguez[David Rodríguez], an upstream
 maintainer of Bundler and RubyGems, for collaborating on this and extending his help to try
 to make things easier for OS packagers while not compromising the experience for upstream
 maintainers (which is very important!).
