@@ -92,7 +92,7 @@ And that is how `rubocop-packaging` is born!
 Listed below are the cops provided by the `Packaging` extension, describing the need to write
 and enforce it and how is it problematic on the Debian (downstream) side.
 
-=== Gemspec Git [[gemspec-git]]
+=== GemspecGit: Using git in gemspec [[gemspec-git]]
 
 About the `GemspecGit` cop:
 
@@ -183,7 +183,7 @@ end
 ----
 
 
-=== Relative Require To Lib [[require-relative-to-lib]]
+=== RelativeRequireToLib: Using require_relative from test code into lib/ [[require-relative-to-lib]]
 
 About the `RelativeRequireToLib` cop:
 
