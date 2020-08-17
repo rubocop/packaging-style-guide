@@ -93,15 +93,11 @@ and enforce it and how is it problematic on the Debian (downstream) side.
 
 === GemspecGit: Using git in gemspec [[gemspec-git]]
 
-About the `GemspecGit` cop:
-
-==== Rationale [[gemspec-git-rationale]]
-
 Avoid using `git ls-files` to produce lists of files. Downstreams often need to build your
 package in an environment that does not have git (on purpose). Instead, use some
 pure Ruby alternatives, like `Dir` or `Dir.glob`.
 
-==== Need [[gemspec-git-need]]
+==== Rationale [[gemspec-git-rationale]]
 
 Packages in Debian are built in a clean environment (https://wiki.debian.org/sbuild[sbuild],
 https://wiki.debian.org/Schroot[schroot], et al) and whilst doing so, the build fails with: +
@@ -184,13 +180,9 @@ end
 
 === RelativeRequireToLib: Using require_relative from test code into lib/ [[require-relative-to-lib]]
 
-About the `RelativeRequireToLib` cop:
-
-==== Rationale [[require-relative-to-lib-rationale]]
-
 Avoid using `require_relative` with relative path to lib. Use `require` instead.
 
-==== Need [[require-relative-to-lib-need]]
+==== Rationale [[require-relative-to-lib-rationale]]
 
 Debian has a https://ci.debian.net/[testing infrastructure] that is designed to test packages
 in their installed form, i.e., closer to how an end-user would use it than to how a developer
