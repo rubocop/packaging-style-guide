@@ -178,11 +178,11 @@ end
 ----
 
 
-=== RelativeRequireToLib: Using require_relative from test code into lib/ [[require-relative-to-lib]]
+=== RequireRelativeHardcodingLib: Using require_relative from test code into lib/ [[require-relative-hardcoding-lib]]
 
 Avoid using `require_relative` with relative path to lib. Use `require` instead.
 
-==== Rationale [[require-relative-to-lib-rationale]]
+==== Rationale [[require-relative-hardcoding-lib-rationale]]
 
 Debian has a https://ci.debian.net/[testing infrastructure] that is designed to test packages
 in their installed form, i.e., closer to how an end-user would use it than to how a developer
