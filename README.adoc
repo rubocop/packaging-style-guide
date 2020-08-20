@@ -1,0 +1,276 @@
+= The Packaging Style Guide
+:idprefix:
+:idseparator: -
+:sectanchors:
+:sectlinks:
+:toc: preamble
+:toclevels: 1
+ifndef::backend-pdf[]
+:toc-title: pass:[<h2>Table of Contents</h2>]
+endif::[]
+:source-highlighter: rouge
+
+== Introduction
+
+[quote, Officer Alex J. Murphy / RoboCop]
+____
+Role models are important.
+____
+
+
+This Packaging style guide outlines the recommended best practices for real-world programmers
+to write code that can be maintained both, upstream and downstream.
+
+You can generate a PDF copy of this guide using https://asciidoctor.org/docs/asciidoctor-pdf/[AsciiDoctor PDF],
+and an HTML copy https://asciidoctor.org/docs/convert-documents/#converting-a-document-to-html[with] https://asciidoctor.org/#installation[AsciiDoctor]
+using the following commands:
+
+[source,shell]
+----
+# Generates README.pdf
+asciidoctor-pdf -a allow-uri-read README.adoc
+
+# Generates README.html
+asciidoctor README.adoc
+----
+
+[TIP]
+====
+Install the `rouge` gem to get nice syntax highlighting in the generated document.
+
+[source,shell]
+----
+gem install rouge
+----
+====
+
+[TIP]
+====
+https://github.com/rubocop-hq/rubocop[RuboCop], a static code analyzer (linter) and formatter,
+has a https://github.com/utkarsh2102/rubocop-packaging[`rubocop-packaging`] extension, based
+on this style guide.
+
+[source,shell]
+----
+gem install rubocop-packaging
+----
+====
+
+
+== How To Read This Guide
+
+The guide is separated into sections based on the different cops that the Packaging extension
+provides. There was an attempt to explicitly mention everything so if anything is still
+unclear, feel free to open an issue asking for further clarity.
+
+
+== A Living Document
+
+This guide is a work in progress - existing guidelines are constantly being improved, new
+guidelines are being added, and occasionally some guidelines would get removed.
+
+
+== Why Packaging Extension?
+
+The Debian Ruby team has a lot of experience in packaging and maintaining Ruby libraries and
+applications for Debian. During this work, they identified several issues in upstream codebases
+that make it difficult to build a Debian package straight out of those Ruby gems (shipped via
+https://rubygems.org[rubygems]).
+
+The Debian developers (downstream maintainers) have been in touch with the RubyGems and other
+upstream maintainers and we're collaborating to try to make things easier for OS packagers
+while not compromising the experience for upstream maintainers.
+
+As a result, we're working on this RuboCop extension to enforce a set of best practices that
+upstream maintainers can follow to make the lives of packagers easier. And that is how
+`rubocop-packaging` is born!
+
+
+== Cops Description
+
+Listed below are the cops provided by the `Packaging` extension, describing the need to write
+and enforce it and how is it problematic on the Debian (downstream) side.
+
+=== GemspecGit: Using git in gemspec [[gemspec-git]]
+
+Avoid using `git ls-files` to produce lists of files. Downstreams often need to build your
+package in an environment that does not have git (on purpose). Instead, use some
+pure Ruby alternatives, like `Dir` or `Dir.glob`.
+
+==== Rationale [[gemspec-git-rationale]]
+
+Packages in Debian are built in a clean environment (https://wiki.debian.org/sbuild[sbuild],
+https://wiki.debian.org/Schroot[schroot], et al) and whilst doing so, the build fails with: +
+`Invalid gemspec in [<gem_name>.gemspec]: No such file or directory - git`
+
+And adding `git` as a dependency for each of the Ruby packaging is something that is not right
+and definitely not recommended. Besides, the source package consists of released tarballs
+(usually downloaded from GitHub/GitLab releases page or converted from the `.gem` file,
+obtained using `gem fetch foo`), which is extracted during build. So even if we add `git` as
+a build dependency, it would still fail as the Debian package source tree is *not a git repo*.
+Even when the package is maintained in git, it is uploaded as tarballs to the archive without
+any version control information.
+
+Therefore, the only way forward here is to patch out the usage of `git` and use some plain Ruby
+alternatives like `Dir` or `Dir.glob` or even `Rake::FileList` whilst doing the Debian
+maintenance.
+
+There's not only Debian or other OS packaging situation/examples, but also a couple of others,
+for instance:
+
+* `ruby-core` as part of their CI system runs their test suite against an unpackaged Ruby
+  tarball which doesn't have a `.git` directory. That means they needed to overwrite the
+  bundler gemspec to not use git. +
+  Actually, not anymore, https://github.com/rubygems/bundler/pull/6985[since git has been removed from bundler's gemspec].
+
+* If you build your application on a bare docker image without git, and you are pointing to
+  a git sourced gem that uses git on its gemspec, you'll get:
+  `No such file or directory - git ls-files (Errno::ENOENT)` warnings all around. For
+  example, if you use this in your Gemfile: +
+  `gem "foo", git: "https://github.com/has-git-in-gemspec/foo"`
+
+Originally, `git ls-files` inside the default gemspec template was designed so that users
+publishing their first gem wouldn't unintentionally publish artifacts to it.
+Recent versions of bundler won't let you release if you have uncommitted files in your
+working directory, so that risk is lower.
+
+==== Examples [[gemspec-git-examples]]
+
+[source,ruby]
+----
+# bad
+Gem::Specification.new do |spec|
+  spec.files         = `git ls-files`.split('\n')
+  spec.test_files    = `git ls-files -- spec/*`.split('\n')
+end
+
+# good
+Gem::Specification.new do |spec|
+  spec.files         = Dir['lib/**/*', 'LICENSE', 'README.md']
+  spec.test_files    = Dir['spec/**/*']
+end
+
+# bad
+Gem::Specification.new do |spec|
+  spec.files         = Dir.chdir(File.expand_path('..', __FILE__)) do
+    `git ls-files -z`.split('\\x0').reject { |f| f.match(%r{^(test|spec|features)/}) }
+  end
+end
+
+# good
+Gem::Specification.new do |spec|
+  spec.files         = Rake::FileList['**/*'].exclude(*File.read('.gitignore').split)
+end
+
+# bad
+Gem::Specification.new do |spec|
+  spec.files         = `git ls-files`.split('\n')
+  spec.test_files    = `git ls-files -- test/{functional,unit}/*`.split('\n')
+  spec.executables   = `git ls-files -- bin/*`.split('\n').map { |f| File.basename(f) }
+end
+
+# good
+Gem::Specification.new do |spec|
+  spec.files         = Dir.glob('lib/**/*')
+  spec.test_files    = Dir.glob('test/{functional,test}/*')
+  spec.executables   = Dir.glob('bin/*').map { |f| File.basename(f) }
+end
+----
+
+
+=== RequireRelativeHardcodingLib: Using require_relative from test code into lib/ [[require-relative-hardcoding-lib]]
+
+Avoid using `require_relative` with relative path to lib. Use `require` instead.
+
+==== Rationale [[require-relative-hardcoding-lib-rationale]]
+
+Debian has a https://ci.debian.net/[testing infrastructure] that is designed to test packages
+in their installed form, i.e., closer to how an end-user would use it than to how a developer
+working against it. For this to work, the test-suite must load code that's installed
+system-wide, instead of the code in the source tree. Using `require_relative` from the tests
+into the `lib` directory makes that impossible, but it also makes the test look less like
+client-code that would use the code in your gem. Therefore, we recommend that test code uses
+the main library code without `require_relative`.
+
+Therefore, when one uses a relative path, we end up getting a `LoadError`, stating: +
+`cannot load such file -- /<<PKGBUILDDIR>>/foo`.
+
+We want to emphasize that *there is nothing wrong* with using `require_relative` inside `lib/`,
+it's just using it from your test code to the `lib` directory prevents the "test the library
+installed system-wide" use case.
+
+Therefore, it is still recommended to use `require_relative` with just this exception to it.
+
+==== Examples [[require-relative-to-lib-examples]]
+
+[source,ruby]
+----
+# bad
+require_relative '../../lib/foo/bar'
+
+# good
+require 'foo/bar'
+
+# bad
+require_relative 'lib/foo.rb'
+
+# good
+require 'foo.rb'
+
+# good
+require_relative 'spec_helper'
+require_relative 'spec/foo/bar'
+----
+
+
+== Contributing
+
+The guide is still a work in progress - new cops are being added, existing ones are being
+refactored. And whilst doing so, some bits might need a little more polishing and
+paraphrasing to make things clearer. Improving such guidelines is a great (and simple way)
+to help the Ruby community!
+
+Also, nothing written in this guide is set in stone. We desire to work together with
+everyone interested in Ruby coding style, so that we could ultimately create a resource that
+will be beneficial to the entire Ruby community!
+
+Feel free to open issues or send pull requests with improvements. Thanks in advance for your
+help!
+
+=== How to Contribute?
+
+It's easy, just follow the contribution guidelines below:
+
+* https://help.github.com/articles/fork-a-repo[Fork]
+  https://github.com/utkarsh2102/rubocop-packaging[rubocop-packaging] on GitHub.
+* Make your feature addition or bug fix in a feature branch.
+* Include a https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html[good description]
+  of your changes.
+* Push your feature branch to GitHub.
+* And finally, send a https://help.github.com/articles/using-pull-requests[pull request].
+
+
+== License
+
+image:https://i.creativecommons.org/l/by/3.0/88x31.png[Creative Commons License] This work
+is licensed under a http://creativecommons.org/licenses/by/3.0/deed.en_US[Creative Commons Attribution 3.0 Unported License].
+
+
+== Spread the Word
+
+A community-driven style guide is of little use to a community that doesn't know about its
+existence. Tweet/toot about the guide, share it with your friends and colleagues. Every
+comment, suggestion, or opinion we get, makes the guide a little bit better. And we want to
+have the best possible guide, don't we?
+
+
+== Credits
+
+This guide has been put together with the help of our experienced Ruby team in Debian. So a
+huge thanks to all of them and their work. Particularly, https://github.com/terceiro[Antonio Terceiro],
+who has helped a lot in putting all this together in the best possible way!
+
+And also a huge thanks to https://github.com/deivid-rodriguez[David Rodríguez], an upstream
+maintainer of Bundler and RubyGems, for collaborating on this and extending his help to try
+to make things easier for OS packagers while not compromising the experience for upstream
+maintainers (which is very important!).
