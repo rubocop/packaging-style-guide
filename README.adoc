@@ -100,8 +100,6 @@ Avoid using `git ls-files` to produce lists of files. Downstreams often need to 
 package in an environment that does not have git (on purpose). Instead, use some
 pure Ruby alternatives, like `Dir` or `Dir.glob`.
 
-==== Examples [[gemspec-git-examples]]
-
 [source,ruby]
 ----
 # bad
@@ -146,8 +144,6 @@ end
 === RequireRelativeHardcodingLib: Using require_relative from test code into lib/ [[require-relative-hardcoding-lib]]
 
 Avoid using `require_relative` with relative path to lib. Use `require` instead.
-
-==== Examples [[require-relative-to-lib-examples]]
 
 [source,ruby]
 ----
