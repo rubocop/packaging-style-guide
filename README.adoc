@@ -17,6 +17,9 @@ ____
 Role models are important.
 ____
 
+ifdef::env-github[]
+TIP: You can find a beautiful version of this guide with much improved navigation at https://packaging.rubystyle.guide.
+endif::[]
 
 This Packaging style guide outlines the recommended best practices for real-world programmers
 to write code that can be maintained both, upstream and downstream.
@@ -97,129 +100,72 @@ Avoid using `git ls-files` to produce lists of files. Downstreams often need to 
 package in an environment that does not have git (on purpose). Instead, use some
 pure Ruby alternatives, like `Dir` or `Dir.glob`.
 
-==== Rationale [[gemspec-git-rationale]]
-
-Packages in Debian are built in a clean environment (https://wiki.debian.org/sbuild[sbuild],
-https://wiki.debian.org/Schroot[schroot], et al) and whilst doing so, the build fails with: +
-`Invalid gemspec in [<gem_name>.gemspec]: No such file or directory - git`
-
-And adding `git` as a dependency for each of the Ruby packaging is something that is not right
-and definitely not recommended. Besides, the source package consists of released tarballs
-(usually downloaded from GitHub/GitLab releases page or converted from the `.gem` file,
-obtained using `gem fetch foo`), which is extracted during build. So even if we add `git` as
-a build dependency, it would still fail as the Debian package source tree is *not a git repo*.
-Even when the package is maintained in git, it is uploaded as tarballs to the archive without
-any version control information.
-
-Therefore, the only way forward here is to patch out the usage of `git` and use some plain Ruby
-alternatives like `Dir` or `Dir.glob` or even `Rake::FileList` whilst doing the Debian
-maintenance.
-
-There's not only Debian or other OS packaging situation/examples, but also a couple of others,
-for instance:
-
-* `ruby-core` as part of their CI system runs their test suite against an unpackaged Ruby
-  tarball which doesn't have a `.git` directory. That means they needed to overwrite the
-  bundler gemspec to not use git. +
-  Actually, not anymore, https://github.com/rubygems/bundler/pull/6985[since git has been removed from bundler's gemspec].
-
-* If you build your application on a bare docker image without git, and you are pointing to
-  a git sourced gem that uses git on its gemspec, you'll get:
-  `No such file or directory - git ls-files (Errno::ENOENT)` warnings all around. For
-  example, if you use this in your Gemfile: +
-  `gem "foo", git: "https://github.com/has-git-in-gemspec/foo"`
-
-Originally, `git ls-files` inside the default gemspec template was designed so that users
-publishing their first gem wouldn't unintentionally publish artifacts to it.
-Recent versions of bundler won't let you release if you have uncommitted files in your
-working directory, so that risk is lower.
-
 ==== Examples [[gemspec-git-examples]]
 
 [source,ruby]
 ----
 # bad
 Gem::Specification.new do |spec|
-  spec.files         = `git ls-files`.split('\n')
-  spec.test_files    = `git ls-files -- spec/*`.split('\n')
+  spec.files         = `git ls-files`.split("\n")
+  spec.test_files    = `git ls-files -- spec`.split("\n")
 end
 
 # good
 Gem::Specification.new do |spec|
-  spec.files         = Dir['lib/**/*', 'LICENSE', 'README.md']
-  spec.test_files    = Dir['spec/**/*']
+  spec.files         = Dir["lib/**/*", "LICENSE", "README.md"]
+  spec.test_files    = Dir["spec/**/*"]
 end
 
 # bad
 Gem::Specification.new do |spec|
-  spec.files         = Dir.chdir(File.expand_path('..', __FILE__)) do
-    `git ls-files -z`.split('\\x0').reject { |f| f.match(%r{^(test|spec|features)/}) }
+  spec.files = Dir.chdir(File.expand_path(__dir__)) do
+    `git ls-files -z`.split("\\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   end
 end
 
 # good
 Gem::Specification.new do |spec|
-  spec.files         = Rake::FileList['**/*'].exclude(*File.read('.gitignore').split)
+  spec.files         = Rake::FileList["**/*"].exclude(*File.read(".gitignore").split)
 end
 
 # bad
 Gem::Specification.new do |spec|
-  spec.files         = `git ls-files`.split('\n')
-  spec.test_files    = `git ls-files -- test/{functional,unit}/*`.split('\n')
-  spec.executables   = `git ls-files -- bin/*`.split('\n').map { |f| File.basename(f) }
+  spec.files         = `git ls-files -- lib/`.split("\n")
+  spec.test_files    = `git ls-files -- test/{functional,unit}/*`.split("\n")
+  spec.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
 end
 
 # good
 Gem::Specification.new do |spec|
-  spec.files         = Dir.glob('lib/**/*')
-  spec.test_files    = Dir.glob('test/{functional,test}/*')
-  spec.executables   = Dir.glob('bin/*').map { |f| File.basename(f) }
+  spec.files         = Dir.glob("lib/**/*")
+  spec.test_files    = Dir.glob("test/{functional,test}/*")
+  spec.executables   = Dir.glob("bin/*").map{ |f| File.basename(f) }
 end
 ----
-
 
 === RequireRelativeHardcodingLib: Using require_relative from test code into lib/ [[require-relative-hardcoding-lib]]
 
 Avoid using `require_relative` with relative path to lib. Use `require` instead.
-
-==== Rationale [[require-relative-hardcoding-lib-rationale]]
-
-Debian has a https://ci.debian.net/[testing infrastructure] that is designed to test packages
-in their installed form, i.e., closer to how an end-user would use it than to how a developer
-working against it. For this to work, the test-suite must load code that's installed
-system-wide, instead of the code in the source tree. Using `require_relative` from the tests
-into the `lib` directory makes that impossible, but it also makes the test look less like
-client-code that would use the code in your gem. Therefore, we recommend that test code uses
-the main library code without `require_relative`.
-
-Therefore, when one uses a relative path, we end up getting a `LoadError`, stating: +
-`cannot load such file -- /<<PKGBUILDDIR>>/foo`.
-
-We want to emphasize that *there is nothing wrong* with using `require_relative` inside `lib/`,
-it's just using it from your test code to the `lib` directory prevents the "test the library
-installed system-wide" use case.
-
-Therefore, it is still recommended to use `require_relative` with just this exception to it.
 
 ==== Examples [[require-relative-to-lib-examples]]
 
 [source,ruby]
 ----
 # bad
-require_relative '../../lib/foo/bar'
+require_relative "lib/foo.rb"
 
 # good
-require 'foo/bar'
+require "foo.rb"
 
 # bad
-require_relative 'lib/foo.rb'
+require_relative "../../lib/foo/bar"
 
 # good
-require 'foo.rb'
+require "foo/bar"
 
 # good
-require_relative 'spec_helper'
-require_relative 'spec/foo/bar'
+require_relative "spec_helper"
+require_relative "spec/foo/bar"
 ----
 
 
