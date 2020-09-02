@@ -53,13 +53,6 @@ https://github.com/rubocop-hq/rubocop[RuboCop], a static code analyzer (linter) 
 has a https://github.com/utkarsh2102/rubocop-packaging[`rubocop-packaging`] extension, based
 on this style guide.
 
-[source,shell]
-----
-gem install rubocop-packaging
-----
-====
-
-
 == How To Read This Guide
 
 The guide is separated into sections based on the different cops that the Packaging extension
@@ -73,26 +66,7 @@ This guide is a work in progress - existing guidelines are constantly being impr
 guidelines are being added, and occasionally some guidelines would get removed.
 
 
-== Why Packaging Extension?
-
-The Debian Ruby team has a lot of experience in packaging and maintaining Ruby libraries and
-applications for Debian. During this work, they identified several issues in upstream codebases
-that make it difficult to build a Debian package straight out of those Ruby gems (shipped via
-https://rubygems.org[rubygems]).
-
-The Debian developers (downstream maintainers) have been in touch with the RubyGems and other
-upstream maintainers and we're collaborating to try to make things easier for OS packagers
-while not compromising the experience for upstream maintainers.
-
-As a result, we're working on this RuboCop extension to enforce a set of best practices that
-upstream maintainers can follow to make the lives of packagers easier. And that is how
-`rubocop-packaging` is born!
-
-
-== Cops Description
-
-Listed below are the cops provided by the `Packaging` extension, describing the need to write
-and enforce it and how is it problematic on the Debian (downstream) side.
+== Source Code Layout
 
 === GemspecGit: Using git in gemspec [[gemspec-git]]
 
