@@ -68,11 +68,11 @@ guidelines are being added, and occasionally some guidelines would get removed.
 
 == Source Code Layout
 
-=== GemspecGit: Using git in gemspec [[gemspec-git]]
+=== Using git in gemspec [[using-git-in-gemspec]]
 
-Avoid using `git ls-files` to produce lists of files. Downstreams often need to build your
-package in an environment that does not have git (on purpose). Instead, use some
-pure Ruby alternatives, like `Dir` or `Dir.glob`.
+Avoid using `git ls-files` to produce lists of files. Downstreams (OS packagers) often
+need to build your package in an environment that does not have git (on purpose).
+Instead, use some pure Ruby alternatives, like `Dir` or `Dir.glob`.
 
 [source,ruby]
 ----
@@ -115,9 +115,10 @@ Gem::Specification.new do |spec|
 end
 ----
 
-=== RequireRelativeHardcodingLib: Using require_relative from test code into lib/ [[require-relative-hardcoding-lib]]
+=== Using require_relative from test code into lib/ [[using-require-relative-from-test-to-lib]]
 
-Avoid using `require_relative` with relative path to lib. Use `require` instead.
+Avoid using `require_relative` with relative path from your test code (spec/ or tests/)
+to lib/. Use `require` instead.
 
 [source,ruby]
 ----
@@ -158,7 +159,7 @@ help!
 It's easy, just follow the contribution guidelines below:
 
 * https://help.github.com/articles/fork-a-repo[Fork]
-  https://github.com/utkarsh2102/rubocop-packaging[rubocop-packaging] on GitHub.
+  https://github.com/rubocop-hq/packaging-style-guide[packaging-style-guide] on GitHub.
 * Make your feature addition or bug fix in a feature branch.
 * Include a https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html[good description]
   of your changes.
