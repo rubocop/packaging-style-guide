@@ -443,6 +443,23 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toctitle"><h2>Table of Contents</h2></div>
 <ul class="sectlevel1">
 <li><a href="#introduction">Introduction</a></li>
+<li><a href="#how-to-read-this-guide">How To Read This Guide</a></li>
+<li><a href="#a-living-document">A Living Document</a></li>
+<li><a href="#why-packaging-extension">Why Packaging Extension?</a></li>
+<li><a href="#source-code-layout">Source Code Layout</a>
+<ul class="sectlevel2">
+<li><a href="#using-git-in-gemspec">Using git in gemspec</a></li>
+<li><a href="#using-require-relative-from-test-to-lib">Using require_relative from test code into lib/</a></li>
+</ul>
+</li>
+<li><a href="#contributing">Contributing</a>
+<ul class="sectlevel2">
+<li><a href="#how-to-contribute">How to Contribute?</a></li>
+</ul>
+</li>
+<li><a href="#license">License</a></li>
+<li><a href="#spread-the-word">Spread the Word</a></li>
+<li><a href="#credits">Credits</a></li>
 </ul>
 </div>
 </div>
@@ -507,27 +524,36 @@ asciidoctor README.adoc</code></pre>
 <div class="paragraph">
 <p><a href="https://github.com/rubocop-hq/rubocop">RuboCop</a>, a static code analyzer (linter) and formatter,
 has a <a href="https://github.com/utkarsh2102/rubocop-packaging"><code>rubocop-packaging</code></a> extension, based
-on this style guide.
-===</p>
+on this style guide.</p>
 </div>
-<div class="paragraph">
-<p>== How To Read This Guide</p>
+</td>
+</tr>
+</table>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="how-to-read-this-guide"><a class="anchor" href="#how-to-read-this-guide"></a><a class="link" href="#how-to-read-this-guide">How To Read This Guide</a></h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>The guide is separated into sections based on the different cops that the Packaging extension
 provides. There was an attempt to explicitly mention everything so if anything is still
 unclear, feel free to open an issue asking for further clarity.</p>
 </div>
-<div class="paragraph">
-<p>== A Living Document</p>
 </div>
+</div>
+<div class="sect1">
+<h2 id="a-living-document"><a class="anchor" href="#a-living-document"></a><a class="link" href="#a-living-document">A Living Document</a></h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>This guide is a work in progress - existing guidelines are constantly being improved, new
 guidelines are being added, and occasionally some guidelines would get removed.</p>
 </div>
-<div class="paragraph">
-<p>== Why Packaging Extension?</p>
 </div>
+</div>
+<div class="sect1">
+<h2 id="why-packaging-extension"><a class="anchor" href="#why-packaging-extension"></a><a class="link" href="#why-packaging-extension">Why Packaging Extension?</a></h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>The Debian Ruby team has a lot of experience in packaging and maintaining Ruby libraries and
 applications for Debian. During this work, they identified several issues in upstream codebases
@@ -543,20 +569,20 @@ while not compromising the experience for upstream maintainers.</p>
 <p>As a result, we&#8217;ve come up with this style guide, mentioning the best practices that upstream
 gem and project maintainers can follow to make the lives of packagers easier.</p>
 </div>
-<div class="paragraph">
-<p>== Source Code Layout</p>
 </div>
-<div class="paragraph">
-<p>=== Using git in gemspec <a id="using-git-in-gemspec"></a></p>
 </div>
+<div class="sect1">
+<h2 id="source-code-layout"><a class="anchor" href="#source-code-layout"></a><a class="link" href="#source-code-layout">Source Code Layout</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="using-git-in-gemspec"><a class="anchor" href="#using-git-in-gemspec"></a><a class="link" href="#using-git-in-gemspec">Using git in gemspec</a></h3>
 <div class="paragraph">
 <p>Avoid using <code>git ls-files</code> to produce lists of files. Downstreams (OS packagers) often
 need to build your package in an environment that does not have git (on purpose).
 Instead, use some pure Ruby alternatives, like <code>Dir</code> or <code>Dir.glob</code>.</p>
 </div>
-<div class="paragraph">
-<p>==== Rationale <a id="using-git-in-gemspec-rationale"></a></p>
-</div>
+<div class="sect3">
+<h4 id="using-git-in-gemspec-rationale"><a class="anchor" href="#using-git-in-gemspec-rationale"></a><a class="link" href="#using-git-in-gemspec-rationale">Rationale</a></h4>
 <div class="paragraph">
 <p>Packages in Debian are built in a clean environment (<a href="https://wiki.debian.org/sbuild">sbuild</a>,
 <a href="https://wiki.debian.org/Schroot">schroot</a>, et al) and whilst doing so, the build fails with:<br>
@@ -646,16 +672,16 @@ working directory, so that risk is lower.</p>
 <span class="k">end</span></code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>=== Using require_relative from test code into lib/ <a id="using-require-relative-from-test-to-lib"></a></p>
 </div>
+</div>
+<div class="sect2">
+<h3 id="using-require-relative-from-test-to-lib"><a class="anchor" href="#using-require-relative-from-test-to-lib"></a><a class="link" href="#using-require-relative-from-test-to-lib">Using require_relative from test code into lib/</a></h3>
 <div class="paragraph">
 <p>Avoid using <code>require_relative</code> with relative path from your test code (spec/ or tests/)
 to lib/. Use <code>require</code> instead.</p>
 </div>
-<div class="paragraph">
-<p>==== Rationale <a id="using-require-relative-from-test-to-lib-rationale"></a></p>
-</div>
+<div class="sect3">
+<h4 id="using-require-relative-from-test-to-lib-rationale"><a class="anchor" href="#using-require-relative-from-test-to-lib-rationale"></a><a class="link" href="#using-require-relative-from-test-to-lib-rationale">Rationale</a></h4>
 <div class="paragraph">
 <p>Debian has a <a href="https://ci.debian.net/">testing infrastructure</a> that is designed to test packages
 in their installed form, i.e., closer to how an end-user would use it than to how a developer
@@ -696,9 +722,13 @@ installed system-wide" use case.</p>
 <span class="nb">require_relative</span> <span class="s2">"spec/foo/bar"</span></code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>== Contributing</p>
 </div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="contributing"><a class="anchor" href="#contributing"></a><a class="link" href="#contributing">Contributing</a></h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>The guide is still a work in progress - new cops are being added, existing ones are being
 refactored. And whilst doing so, some bits might need a little more polishing and
@@ -714,9 +744,8 @@ will be beneficial to the entire Ruby community!</p>
 <p>Feel free to open issues or send pull requests with improvements. Thanks in advance for your
 help!</p>
 </div>
-<div class="paragraph">
-<p>=== How to Contribute?</p>
-</div>
+<div class="sect2">
+<h3 id="how-to-contribute"><a class="anchor" href="#how-to-contribute"></a><a class="link" href="#how-to-contribute">How to Contribute?</a></h3>
 <div class="paragraph">
 <p>It&#8217;s easy, just follow the contribution guidelines below:</p>
 </div>
@@ -741,25 +770,32 @@ of your changes.</p>
 </li>
 </ul>
 </div>
-<div class="paragraph">
-<p>== License</p>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="license"><a class="anchor" href="#license"></a><a class="link" href="#license">License</a></h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p><span class="image"><img src="https://i.creativecommons.org/l/by/3.0/88x31.png" alt="Creative Commons License"></span> This work
 is licensed under a <a href="http://creativecommons.org/licenses/by/3.0/deed.en_US">Creative Commons Attribution 3.0 Unported License</a>.</p>
 </div>
-<div class="paragraph">
-<p>== Spread the Word</p>
 </div>
+</div>
+<div class="sect1">
+<h2 id="spread-the-word"><a class="anchor" href="#spread-the-word"></a><a class="link" href="#spread-the-word">Spread the Word</a></h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>A community-driven style guide is of little use to a community that doesn&#8217;t know about its
 existence. Tweet/toot about the guide, share it with your friends and colleagues. Every
 comment, suggestion, or opinion we get, makes the guide a little bit better. And we want to
 have the best possible guide, don&#8217;t we?</p>
 </div>
-<div class="paragraph">
-<p>== Credits</p>
 </div>
+</div>
+<div class="sect1">
+<h2 id="credits"><a class="anchor" href="#credits"></a><a class="link" href="#credits">Credits</a></h2>
+<div class="sectionbody">
 <div class="paragraph">
 <p>This guide has been put together with the help of our experienced Ruby team in Debian. So a
 huge thanks to all of them and their work. Particularly, <a href="https://github.com/terceiro">Antonio Terceiro</a>,
@@ -771,16 +807,12 @@ maintainer of Bundler and RubyGems, for collaborating on this and extending his 
 to make things easier for OS packagers while not compromising the experience for upstream
 maintainers (which is very important!).</p>
 </div>
-</td>
-</tr>
-</table>
-</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-09-04 14:38:28 UTC
+Last updated 2020-09-04 14:39:32 UTC
 </div>
 </div>
 <style>
