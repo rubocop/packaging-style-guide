@@ -52,6 +52,7 @@ gem install rouge
 https://github.com/rubocop-hq/rubocop[RuboCop], a static code analyzer (linter) and formatter,
 has a https://github.com/utkarsh2102/rubocop-packaging[`rubocop-packaging`] extension, based
 on this style guide.
+====
 
 == How To Read This Guide
 
