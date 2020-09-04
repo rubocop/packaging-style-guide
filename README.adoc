@@ -66,6 +66,21 @@ This guide is a work in progress - existing guidelines are constantly being impr
 guidelines are being added, and occasionally some guidelines would get removed.
 
 
+== Why Packaging Extension?
+
+The Debian Ruby team has a lot of experience in packaging and maintaining Ruby libraries and
+applications for Debian. During this work, they identified several issues in upstream codebases
+that make it difficult to build a Debian package straight out of those Ruby gems (shipped via
+https://rubygems.org[rubygems]).
+
+The Debian developers (downstream maintainers) have been in touch with the RubyGems and other
+upstream maintainers and we're collaborating to try to make things easier for OS packagers
+while not compromising the experience for upstream maintainers.
+
+As a result, we've come up with this style guide, mentioning the best practices that upstream
+gem and project maintainers can follow to make the lives of packagers easier.
+
+
 == Source Code Layout
 
 === Using git in gemspec [[using-git-in-gemspec]]
@@ -73,6 +88,44 @@ guidelines are being added, and occasionally some guidelines would get removed.
 Avoid using `git ls-files` to produce lists of files. Downstreams (OS packagers) often
 need to build your package in an environment that does not have git (on purpose).
 Instead, use some pure Ruby alternatives, like `Dir` or `Dir.glob`.
+
+==== Rationale [[using-git-in-gemspec-rationale]]
+
+Packages in Debian are built in a clean environment (https://wiki.debian.org/sbuild[sbuild],
+https://wiki.debian.org/Schroot[schroot], et al) and whilst doing so, the build fails with: +
+`Invalid gemspec in [<gem_name>.gemspec]: No such file or directory - git`
+
+And adding `git` as a dependency for each of the Ruby packaging is something that is not right
+and definitely not recommended. Besides, the source package consists of released tarballs
+(usually downloaded from GitHub/GitLab releases page or converted from the `.gem` file,
+obtained using `gem fetch foo`), which is extracted during build. So even if we add `git` as
+a build dependency, it would still fail as the Debian package source tree is *not a git repository*.
+Even when the package is maintained in git, it is uploaded as tarballs to the archive without
+any version control information.
+
+Therefore, the best way forward here is to patch out the usage of `git` and use some plain Ruby
+alternatives like `Dir` or `Dir.glob` or even `Rake::FileList` whilst doing the Debian
+maintenance.
+
+There's not only Debian or other OS packaging situation/examples, but also a couple of others,
+for instance:
+
+* `ruby-core` as part of their CI system runs their test suite against an unpackaged Ruby
+  tarball which doesn't have a `.git` directory. That means they needed to overwrite the
+  bundler gemspec to not use git. +
+  Actually, not anymore, https://github.com/rubygems/bundler/pull/6985[since git has been removed from bundler's gemspec].
+
+* If you build your application on a bare docker image without git, and you are pointing to
+  a git sourced gem that uses git on its gemspec, you'll get:
+  `No such file or directory - git ls-files (Errno::ENOENT)` warnings all around. For
+  example, if you use this in your Gemfile: +
+  `gem "foo", git: "https://github.com/has-git-in-gemspec/foo"`
+
+Originally, `git ls-files` inside the default gemspec template was designed so that users
+publishing their first gem wouldn't unintentionally publish artifacts to it.
+Recent versions of bundler won't let you release if you have uncommitted files in your
+working directory, so that risk is lower.
+
 
 [source,ruby]
 ----
@@ -96,6 +149,8 @@ Gem::Specification.new do |spec|
 end
 
 # good
+require 'rake/file_list'
+
 Gem::Specification.new do |spec|
   spec.files         = Rake::FileList["**/*"].exclude(*File.read(".gitignore").split)
 end
@@ -119,6 +174,26 @@ end
 
 Avoid using `require_relative` with relative path from your test code (spec/ or tests/)
 to lib/. Use `require` instead.
+
+==== Rationale [[using-require-relative-from-test-to-lib-rationale]]
+
+Debian has a https://ci.debian.net/[testing infrastructure] that is designed to test packages
+in their installed form, i.e., closer to how an end-user would use it than to how a developer
+working against it. For this to work, the test-suite must load code that's installed
+system-wide, instead of the code in the source tree. Using `require_relative` from the tests
+into the `lib` directory makes that impossible, but it also makes the test look less like
+client-code that would use the code in your gem. Therefore, we recommend that test code uses
+the main library code without `require_relative`.
+
+Therefore, when one uses a relative path, we end up getting a `LoadError`, stating: +
+`cannot load such file -- /<<PKGBUILDDIR>>/foo`.
+
+We want to emphasize that *there is nothing wrong* with using `require_relative` inside `lib/`,
+it's just using it from your test code to the `lib` directory prevents the "test the library
+installed system-wide" use case.
+
+Therefore, it is still recommended to use `require_relative` with just this exception to it.
+
 
 [source,ruby]
 ----
