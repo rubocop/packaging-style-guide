@@ -17,6 +17,9 @@ ____
 Role models are important.
 ____
 
+ifdef::env-github[]
+TIP: You can find a beautiful version of this guide with much improved navigation at https://packaging.rubystyle.guide.
+endif::[]
 
 This Packaging style guide outlines the recommended best practices for real-world programmers
 to write code that can be maintained both, upstream and downstream.
@@ -50,13 +53,6 @@ https://github.com/rubocop-hq/rubocop[RuboCop], a static code analyzer (linter) 
 has a https://github.com/utkarsh2102/rubocop-packaging[`rubocop-packaging`] extension, based
 on this style guide.
 
-[source,shell]
-----
-gem install rubocop-packaging
-----
-====
-
-
 == How To Read This Guide
 
 The guide is separated into sections based on the different cops that the Packaging extension
@@ -81,23 +77,19 @@ The Debian developers (downstream maintainers) have been in touch with the RubyG
 upstream maintainers and we're collaborating to try to make things easier for OS packagers
 while not compromising the experience for upstream maintainers.
 
-As a result, we're working on this RuboCop extension to enforce a set of best practices that
-upstream maintainers can follow to make the lives of packagers easier. And that is how
-`rubocop-packaging` is born!
+As a result, we've come up with this style guide, mentioning the best practices that upstream
+gem and project maintainers can follow to make the lives of packagers easier.
 
 
-== Cops Description
+== Source Code Layout
 
-Listed below are the cops provided by the `Packaging` extension, describing the need to write
-and enforce it and how is it problematic on the Debian (downstream) side.
+=== Using git in gemspec [[using-git-in-gemspec]]
 
-=== GemspecGit: Using git in gemspec [[gemspec-git]]
+Avoid using `git ls-files` to produce lists of files. Downstreams (OS packagers) often
+need to build your package in an environment that does not have git (on purpose).
+Instead, use some pure Ruby alternatives, like `Dir` or `Dir.glob`.
 
-Avoid using `git ls-files` to produce lists of files. Downstreams often need to build your
-package in an environment that does not have git (on purpose). Instead, use some
-pure Ruby alternatives, like `Dir` or `Dir.glob`.
-
-==== Rationale [[gemspec-git-rationale]]
+==== Rationale [[using-git-in-gemspec-rationale]]
 
 Packages in Debian are built in a clean environment (https://wiki.debian.org/sbuild[sbuild],
 https://wiki.debian.org/Schroot[schroot], et al) and whilst doing so, the build fails with: +
@@ -107,11 +99,11 @@ And adding `git` as a dependency for each of the Ruby packaging is something tha
 and definitely not recommended. Besides, the source package consists of released tarballs
 (usually downloaded from GitHub/GitLab releases page or converted from the `.gem` file,
 obtained using `gem fetch foo`), which is extracted during build. So even if we add `git` as
-a build dependency, it would still fail as the Debian package source tree is *not a git repo*.
+a build dependency, it would still fail as the Debian package source tree is *not a git repository*.
 Even when the package is maintained in git, it is uploaded as tarballs to the archive without
 any version control information.
 
-Therefore, the only way forward here is to patch out the usage of `git` and use some plain Ruby
+Therefore, the best way forward here is to patch out the usage of `git` and use some plain Ruby
 alternatives like `Dir` or `Dir.glob` or even `Rake::FileList` whilst doing the Debian
 maintenance.
 
@@ -134,55 +126,56 @@ publishing their first gem wouldn't unintentionally publish artifacts to it.
 Recent versions of bundler won't let you release if you have uncommitted files in your
 working directory, so that risk is lower.
 
-==== Examples [[gemspec-git-examples]]
 
 [source,ruby]
 ----
 # bad
 Gem::Specification.new do |spec|
-  spec.files         = `git ls-files`.split('\n')
-  spec.test_files    = `git ls-files -- spec/*`.split('\n')
+  spec.files         = `git ls-files`.split("\n")
+  spec.test_files    = `git ls-files -- spec`.split("\n")
 end
 
 # good
 Gem::Specification.new do |spec|
-  spec.files         = Dir['lib/**/*', 'LICENSE', 'README.md']
-  spec.test_files    = Dir['spec/**/*']
+  spec.files         = Dir["lib/**/*", "LICENSE", "README.md"]
+  spec.test_files    = Dir["spec/**/*"]
 end
 
 # bad
 Gem::Specification.new do |spec|
-  spec.files         = Dir.chdir(File.expand_path('..', __FILE__)) do
-    `git ls-files -z`.split('\\x0').reject { |f| f.match(%r{^(test|spec|features)/}) }
+  spec.files = Dir.chdir(File.expand_path(__dir__)) do
+    `git ls-files -z`.split("\\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   end
 end
 
 # good
+require 'rake/file_list'
+
 Gem::Specification.new do |spec|
-  spec.files         = Rake::FileList['**/*'].exclude(*File.read('.gitignore').split)
+  spec.files         = Rake::FileList["**/*"].exclude(*File.read(".gitignore").split)
 end
 
 # bad
 Gem::Specification.new do |spec|
-  spec.files         = `git ls-files`.split('\n')
-  spec.test_files    = `git ls-files -- test/{functional,unit}/*`.split('\n')
-  spec.executables   = `git ls-files -- bin/*`.split('\n').map { |f| File.basename(f) }
+  spec.files         = `git ls-files -- lib/`.split("\n")
+  spec.test_files    = `git ls-files -- test/{functional,unit}/*`.split("\n")
+  spec.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
 end
 
 # good
 Gem::Specification.new do |spec|
-  spec.files         = Dir.glob('lib/**/*')
-  spec.test_files    = Dir.glob('test/{functional,test}/*')
-  spec.executables   = Dir.glob('bin/*').map { |f| File.basename(f) }
+  spec.files         = Dir.glob("lib/**/*")
+  spec.test_files    = Dir.glob("test/{functional,test}/*")
+  spec.executables   = Dir.glob("bin/*").map{ |f| File.basename(f) }
 end
 ----
 
+=== Using require_relative from test code into lib/ [[using-require-relative-from-test-to-lib]]
 
-=== RequireRelativeHardcodingLib: Using require_relative from test code into lib/ [[require-relative-hardcoding-lib]]
+Avoid using `require_relative` with relative path from your test code (spec/ or tests/)
+to lib/. Use `require` instead.
 
-Avoid using `require_relative` with relative path to lib. Use `require` instead.
-
-==== Rationale [[require-relative-hardcoding-lib-rationale]]
+==== Rationale [[using-require-relative-from-test-to-lib-rationale]]
 
 Debian has a https://ci.debian.net/[testing infrastructure] that is designed to test packages
 in their installed form, i.e., closer to how an end-user would use it than to how a developer
@@ -201,25 +194,24 @@ installed system-wide" use case.
 
 Therefore, it is still recommended to use `require_relative` with just this exception to it.
 
-==== Examples [[require-relative-to-lib-examples]]
 
 [source,ruby]
 ----
 # bad
-require_relative '../../lib/foo/bar'
+require_relative "lib/foo.rb"
 
 # good
-require 'foo/bar'
+require "foo.rb"
 
 # bad
-require_relative 'lib/foo.rb'
+require_relative "../../lib/foo/bar"
 
 # good
-require 'foo.rb'
+require "foo/bar"
 
 # good
-require_relative 'spec_helper'
-require_relative 'spec/foo/bar'
+require_relative "spec_helper"
+require_relative "spec/foo/bar"
 ----
 
 
@@ -242,7 +234,7 @@ help!
 It's easy, just follow the contribution guidelines below:
 
 * https://help.github.com/articles/fork-a-repo[Fork]
-  https://github.com/utkarsh2102/rubocop-packaging[rubocop-packaging] on GitHub.
+  https://github.com/rubocop-hq/packaging-style-guide[packaging-style-guide] on GitHub.
 * Make your feature addition or bug fix in a feature branch.
 * Include a https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html[good description]
   of your changes.
