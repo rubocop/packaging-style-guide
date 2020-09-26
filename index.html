@@ -706,10 +706,10 @@ installed system-wide" use case.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="rouge highlight"><code data-lang="ruby"><span class="c1"># bad</span>
-<span class="nb">require_relative</span> <span class="s2">"lib/foo.rb"</span>
+<span class="nb">require_relative</span> <span class="s2">"lib/foo"</span>
 
 <span class="c1"># good</span>
-<span class="nb">require</span> <span class="s2">"foo.rb"</span>
+<span class="nb">require</span> <span class="s2">"foo"</span>
 
 <span class="c1"># bad</span>
 <span class="nb">require_relative</span> <span class="s2">"../../lib/foo/bar"</span>
@@ -718,8 +718,8 @@ installed system-wide" use case.</p>
 <span class="nb">require</span> <span class="s2">"foo/bar"</span>
 
 <span class="c1"># good</span>
-<span class="nb">require_relative</span> <span class="s2">"spec_helper"</span>
-<span class="nb">require_relative</span> <span class="s2">"spec/foo/bar"</span></code></pre>
+<span class="nb">require_relative</span> <span class="s2">"foo/bar/bax"</span>
+<span class="nb">require_relative</span> <span class="s2">"baz/qux"</span></code></pre>
 </div>
 </div>
 </div>
@@ -812,7 +812,7 @@ maintainers (which is very important!).</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-09-19 14:30:34 UTC
+Last updated 2020-09-26 13:21:40 UTC
 </div>
 </div>
 <style>
