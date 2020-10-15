@@ -260,8 +260,9 @@ have the best possible guide, don't we?
 == Credits
 
 This guide has been put together with the help of our experienced Ruby team in Debian. So a
-huge thanks to all of them and their work. Particularly, https://github.com/terceiro[Antonio Terceiro],
-who has helped a lot in putting all this together in the best possible way!
+huge thanks to all of them and their work. Particularly, https://github.com/utkarsh2102[Utkarsh Gupta]
+and https://github.com/terceiro[Antonio Terceiro], who have helped a lot in putting all this
+together in the best possible way!
 
 And also a huge thanks to https://github.com/deivid-rodriguez[David Rodríguez], an upstream
 maintainer of Bundler and RubyGems, for collaborating on this and extending his help to try
