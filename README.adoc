@@ -264,7 +264,8 @@ huge thanks to all of them and their work. Particularly, https://github.com/utka
 and https://github.com/terceiro[Antonio Terceiro], who have helped a lot in putting all this
 together in the best possible way!
 
-And also a huge thanks to https://github.com/deivid-rodriguez[David Rodríguez], an upstream
-maintainer of Bundler and RubyGems, for collaborating on this and extending his help to try
-to make things easier for OS packagers while not compromising the experience for upstream
-maintainers (which is very important!).
+And also a huge thanks to https://github.com/robotdana[Dana Sherson] for her help in putting
+together the inital scaffolding and to https://github.com/deivid-rodriguez[David Rodríguez],
+an upstream maintainer of Bundler and RubyGems, for collaborating on this and extending his
+help to try to make things easier for OS packagers while not compromising the experience for
+upstream maintainers (which is very important!).
